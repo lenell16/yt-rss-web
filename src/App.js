@@ -18,9 +18,9 @@ import { Formik, Form, Field } from "formik";
 import { useQuery } from "draqula";
 import gql from "graphql-tag";
 
-const FEED_QUERY = gql`
-	query Feed($url: String!) {
-		feed(url: $url) {
+const FEEDS_QUERY = gql`
+	query Feeds($urls: [String!]!) {
+		feeds(urls: $urls) {
 			id
 			title
 			items {
@@ -61,8 +61,11 @@ function App() {
 	const [url, setUrl] = useState(
 		"https://www.youtube.com/feeds/videos.xml?channel_id=UCIyIoM_Nd8HtY19fuR_ov2A"
 	);
-	const { data, error, isLoading } = useQuery(FEED_QUERY, {
-		url,
+	const { data, error, isLoading } = useQuery(FEEDS_QUERY, {
+		urls: [
+			url,
+			"https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw",
+		],
 	});
 
 	return (
@@ -82,15 +85,17 @@ function App() {
 				{isLoading && <Spinner size="large" />}
 				{data && (
 					<Set spacing="major-4">
-						{data.feed.items.map((item) => (
-							<LinkCard
-								key={item.id}
-								title={item.title}
-								link={item.link}
-								channel={data.feed.title}
-								image={item.image}
-							/>
-						))}
+						{data.feeds.map((feed) =>
+							feed.items.map((item) => (
+								<LinkCard
+									key={item.id}
+									title={item.title}
+									link={item.link}
+									channel={feed.title}
+									image={item.image}
+								/>
+							))
+						)}
 					</Set>
 				)}
 			</Stack>
